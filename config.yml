@@ -1,0 +1,53 @@
+base:
+  model_arc: "Bert"
+  model_name: "bert-base-multilingual-cased"
+  seed: 42
+  train_args:
+    num_workers: 5
+    num_epochs: 7
+    batch_size: 16
+    lr: 0.00005
+    weight_decay: 0.01
+    warmup_steps: 500
+    output_dir: './results/base'
+    save_steps: 500
+    save_total_limit: 3
+    logging_steps: 100
+    logging_dir: './logs/base'
+    evaluation_strategy: 'epoch'
+    eval_steps: 500
+    save_model: False
+  val_args:
+    use_kfold: True
+    num_k: 5
+    test_size: 0.2
+  test_args:
+    '1': 2000
+    '2': 2000
+    '3': 2000
+    '4': 2000
+    '5': 2000
+
+electra-small-v3:
+  model_arc: "Electra"
+  model_name: "monologg/koelectra-small-v3-discriminator"
+  seed: 1050
+  train_args:
+    num_epochs: 4
+    train_batch_size: 16
+    eval_batch_size: 16
+    lr: 0.00005
+    weight_decay: 0.01
+    warmup_steps: 500
+    output_dir: './results/electra-small-v3'
+    save_steps: 500
+    save_total_limit: 3
+    logging_steps: 100
+    logging_dir: './logs/electra-small-v3'
+    evaluation_strategy: 'steps'
+    eval_steps: 500
+  val_args:
+    use_kfold: True
+    num_k: 5
+    test_size: 0
+
