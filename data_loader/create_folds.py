@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold
-from data_loader.load_data import load_data
+from data_loader.load_data_ import load_data
 
 def stratified_kfold(cfg):
     whole_df = load_data('/opt/ml/input/data/train/train.tsv')

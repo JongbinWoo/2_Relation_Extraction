@@ -223,7 +223,7 @@ for e in range(num_epochs):
     if test_acc >= best_acc:
         best_acc = test_acc
         torch.save(model.state_dict(), "/opt/ml/model/model_state_dict.pt")
-
+    print()
 # %% md
 
 # Predict

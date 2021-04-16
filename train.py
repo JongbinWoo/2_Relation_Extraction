@@ -15,7 +15,7 @@ from transformers import AutoTokenizer, AdamW
 
 from model.model import MultilabeledSequenceModel
 from config import YamlConfigManager
-from data_loader.load_data import *
+from data_loader.load_data_ import *
 from trainer.trainer import Trainer 
 
 import optuna
@@ -55,6 +55,7 @@ def train(fold, params, cfg, save_model=False):
     MODEL_NAME = cfg.values.model_name
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+    tokenizer.add_special_tokens({'additional_special_tokens':['[ENT1]', '[ENT2]']})
 
     df = pd.read_csv('/opt/ml/input/data/train/train_folds.tsv', delimiter=',')
     train_df = df[df.kfold != fold].reset_index(drop=True)
@@ -78,7 +79,8 @@ def train(fold, params, cfg, save_model=False):
                               pin_memory=True,
                               shuffle=False)
     
-    model = MultilabeledSequenceModel(MODEL_NAME, 42, params['dropout']).to(device)
+    model = MultilabeledSequenceModel(MODEL_NAME, 42, len(tokenizer), params['dropout']).to(device)
+    
     optimizer = AdamW(params=model.parameters(), lr=params['lr'])
     loss = nn.CrossEntropyLoss()
     model_set = {
@@ -97,7 +99,7 @@ def train(fold, params, cfg, save_model=False):
         if val_acc > best_acc: 
             best_acc = val_acc
             if save_model:
-                torch.save(model.state_dict(), f'model_{fold}.bin')
+                torch.save(model.state_dict(), f'model_{fold}_.bin')
         else:
             early_stopping_counter += 1
         
@@ -106,25 +108,30 @@ def train(fold, params, cfg, save_model=False):
     return best_acc
 
 def main(cfg):
-    # stratified_kfold(cfg)
+    stratified_kfold(cfg)
     USE_KFOLD = cfg.values.val_args.use_kfold     
     if USE_KFOLD:
-        objective = lambda trial: hp_search(trial, cfg)
-        study = optuna.create_study(direction='maximize')
-        study.optimize(objective, n_trials=20)
+        # objective = lambda trial: hp_search(trial, cfg)
+        # study = optuna.create_study(direction='maximize')
+        # study.optimize(objective, n_trials=20)
     
-        best_trial = study.best_trial
-        print(f'best acc : {best_trial.values}')
-        print(f'best acc : {best_trial.params}')
+        # best_trial = study.best_trial
+        # print(f'best acc : {best_trial.values}')
+        # print(f'best acc : {best_trial.params}')
+        params = {
+            'batch_size': 1,
+            'lr': 1.61e-06,
+            'dropout': 0.633
+        }
         scores = 0
         for j in range(5):
-            scr = train(j, best_trial.params, cfg, save_model=True)
+            scr = train(j, params, cfg, save_model=True)  #best_trial.params
             scores += scr
 
         print(scores / 5)
-        df = study.trials_dataframe(attrs=("number", "value", "params", "state"))
-        df.to_csv('./hpo_result.csv')
-        plot_parallel_coordinate(study)
+        # df = study.trials_dataframe(attrs=("number", "value", "params", "state"))
+        # df.to_csv('./hpo_result.csv')
+        # plot_parallel_coordinate(study)
     
     else:
         # train_df = whole_df[whole_df.kfold != 0].reset_index(drop=True)

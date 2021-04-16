@@ -17,12 +17,15 @@ class Trainer:
         final_loss = 0
 
         for data in tqdm(data_loader):
-            inputs = data['input_ids'].long().to(self.device)
             targets = data['labels'].to(self.device)
 
             self.optimizer.zero_grad()
             with autocast():
-                outputs = self.model(inputs)
+                outputs = self.model(
+                    input_ids=data['input_ids'].to(self.device),
+                    attention_mask=data['attention_mask'].to(self.device),
+                    token_type_ids=data['token_type_ids'].to(self.device)
+                )
                 loss = self.loss(outputs, targets)
             
 
@@ -40,8 +43,11 @@ class Trainer:
             for data in data_loader:
                 targets = data['labels'].to(self.device)
 
-                inputs = data['input_ids'].long().to(self.device)
-                outputs = self.model(inputs)
+                outputs = self.model(
+                    input_ids=data['input_ids'].to(self.device),
+                    attention_mask=data['attention_mask'].to(self.device),
+                    token_type_ids=data['token_type_ids'].to(self.device)
+                )
                 preds = outputs.argmax(dim=-1)
 
                 eval_preds.append(preds.cpu().numpy())
