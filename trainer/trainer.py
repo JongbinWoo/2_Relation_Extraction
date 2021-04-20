@@ -29,8 +29,7 @@ class Trainer:
                 outputs = self.model(
                     **data
                 )
-                loss = self.loss(outputs, targets)
-            
+                loss = self.loss(outputs, targets)        
 
             self.scaler.scale(loss).backward()
             self.scaler.step(self.optimizer)

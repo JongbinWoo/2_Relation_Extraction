@@ -17,11 +17,6 @@ class Bert(nn.Module):
                  label_nbr,
                  tokenizer_len,
                  dropout):
-        """
-        Just extends the AutoModelForSequenceClassification for N labels
-        pretrained_model_name string -> name of the pretrained model to be fetched from HuggingFace repo
-        label_nbr int -> number of labels of the dataset
-        """
         super().__init__()
         self.transformer = AutoModel.from_pretrained(pretrained_model_name)
         self.transformer.resize_token_embeddings(tokenizer_len)
@@ -41,11 +36,7 @@ class Koelectra_base(nn.Module):
                  label_nbr,
                  tokenizer_len,
                  dropout):
-        """
-        Just extends the AutoModelForSequenceClassification for N labels
-        pretrained_model_name string -> name of the pretrained model to be fetched from HuggingFace repo
-        label_nbr int -> number of labels of the dataset
-        """
+
         super().__init__()
         self.transformer = AutoModel.from_pretrained(pretrained_model_name)
         self.transformer.resize_token_embeddings(tokenizer_len)
@@ -56,7 +47,7 @@ class Koelectra_base(nn.Module):
         )
 
     def forward(self, input_ids, attention_mask, token_type_ids):
-        x = self.transformer(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)[0][:, 0, :] # pooler_output
+        x = self.transformer(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)[0][:, 0, :] # cls token
         return self.classifier(x)
 
 class Xlm_roberta_large(nn.Module):
@@ -65,11 +56,7 @@ class Xlm_roberta_large(nn.Module):
                  label_nbr,
                  tokenizer_len,
                  dropout):
-        """
-        Just extends the AutoModelForSequenceClassification for N labels
-        pretrained_model_name string -> name of the pretrained model to be fetched from HuggingFace repo
-        label_nbr int -> number of labels of the dataset
-        """
+        
         super().__init__()
         self.transformer = AutoModel.from_pretrained(pretrained_model_name)
         self.transformer.resize_token_embeddings(tokenizer_len)

@@ -39,11 +39,11 @@ def return_tag(tagging_list, is_first):
         return ' ` ' + tag.lower() + ' ` ' 
     else:
         return ' ^ ' + tag.lower() + ' ^ '
-# bert input을 위한 tokenizing.
-# tip! 다양한 종류의 tokenizer와 special token들을 활용하는 것으로도 새로운 시도를 해볼 수 있습니다.
-# baseline code에서는 2가지 부분을 활용했습니다.
-def tokenized_dataset(dataset, tokenizer):
-    # if not os.path.exists('/opt/ml/input/data/train/train_ner'):
+
+def string_replace(string, idx_s, idx_e, replace_word):
+    return string[:idx_s] + replace_word + string[idx_e+1:]
+
+def tokenized_dataset(datasejt, tokenizer):
     print('PRORO NER TAGGIN START!')
     concat_entity = []
     ner = Pororo(task='ner', lang='ko')
@@ -67,11 +67,6 @@ def tokenized_dataset(dataset, tokenizer):
             sentence = string_replace(sentence, e1_s, e1_e, ner_01)
 
         concat_entity.append(sentence)
-    #     with open('/opt/ml/input/data/train/train_ner', 'wb') as lf:
-    #         pickle.dump(concat_entity, lf)
-    # else:
-    #     with open('/opt/ml/input/data/train/train_ner', 'wb') as lf:
-    #         concat_entity = pickle.load(lf)
     tokenized_sentences = tokenizer(
             concat_entity,
             return_tensors="pt", # 2차원 배열로 나온다.
@@ -82,20 +77,5 @@ def tokenized_dataset(dataset, tokenizer):
             )
     return tokenized_sentences
 
-def string_replace(string, idx_s, idx_e, replace_word):
-    return string[:idx_s] + replace_word + string[idx_e+1:]
 
 
-
-
-
-#%%
-# tokenized_train = tokenized_dataset(train_df, tokenizer)
-#%%
-
-# df = pd.read_csv('/opt/ml/input/data/train/train_folds.tsv', delimiter=',')
-# #%%
-# MODEL_NAME = 'xlm-roberta-large' #cfg.values.model_name
-# tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-
-# train_df = df[df.kfold != 0].reset_index(drop=True)
