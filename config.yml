@@ -4,8 +4,9 @@ base:
   seed: 42
   train_args:
     num_workers: 5
-    num_epochs: 7
+    num_epochs: 15
     batch_size: 16
+    eval_batch_size: 32
     lr: 0.00005
     weight_decay: 0.01
     warmup_steps: 500
@@ -28,24 +29,39 @@ base:
     '4': 2000
     '5': 2000
 
-electra-small-v3:
+electra-base-v3:
   model_arc: "Electra"
-  model_name: "monologg/koelectra-small-v3-discriminator"
-  seed: 1050
+  model_name: "monologg/koelectra-base-v3-discriminator"
+  seed: 42
   train_args:
-    num_epochs: 4
+    num_workers: 5
+    num_epochs: 15
     train_batch_size: 16
-    eval_batch_size: 16
+    eval_batch_size: 32
     lr: 0.00005
     weight_decay: 0.01
     warmup_steps: 500
-    output_dir: './results/electra-small-v3'
+    output_dir: './results/electra-base-v3'
     save_steps: 500
-    save_total_limit: 3
-    logging_steps: 100
-    logging_dir: './logs/electra-small-v3'
-    evaluation_strategy: 'steps'
-    eval_steps: 500
+  val_args:
+    use_kfold: True
+    num_k: 5
+    test_size: 0
+
+xlm-roberta-base:
+  model_arc: "roberta"
+  model_name: "xlm-roberta-large"
+  seed: 42
+  train_args:
+    num_workers: 5
+    num_epochs: 15
+    train_batch_size: 16
+    eval_batch_size: 32
+    lr: 0.00005
+    weight_decay: 0.01
+    warmup_steps: 500
+    output_dir: './results/xlm-roberta-large'
+    save_steps: 500
   val_args:
     use_kfold: True
     num_k: 5

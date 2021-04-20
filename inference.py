@@ -1,6 +1,9 @@
 from transformers import AutoTokenizer, BertForSequenceClassification, Trainer, TrainingArguments, BertConfig, BertTokenizer
 from torch.utils.data import DataLoader
-from data_loader.load_data import *
+# from data_loader.load_data_ import load_data, RE_Dataset, tokenized_dataset
+import data_loader.load_data as load_data
+import data_loader.load_data_ as load_data_
+
 import pandas as pd
 import torch
 import pickle as pickle
@@ -52,35 +55,46 @@ def inference(tokenized_sent, device, states, tokenizer_len, cfg):
     return probs
 
 def load_test_dataset(dataset_dir, tokenizer):
-    test_dataset = load_data(dataset_dir)
+    test_dataset = load_data.load_data(dataset_dir)
     test_label = test_dataset['label'].values
     # tokenizing dataset
-    tokenized_test = tokenized_dataset(test_dataset, tokenizer)
+    tokenized_test = load_data.tokenized_dataset(test_dataset, tokenizer)
+    return tokenized_test, test_label
+
+def load_test_dataset_(dataset_dir, tokenizer):
+    test_dataset = load_data_.load_data(dataset_dir)
+    test_label = test_dataset['label'].values
+    # tokenizing dataset
+    tokenized_test = load_data_.tokenized_dataset(test_dataset, tokenizer)
     return tokenized_test, test_label
 
 def main(cfg):
     """
       주어진 dataset tsv 파일과 같은 형태일 경우 inference 가능한 코드입니다.
     """
+    test_dataset_dir = "/opt/ml/input/data/test/test.tsv"
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     # load tokenizer
     MODEL_NAME = cfg.values.model_name
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    # tokenizer.add_special_tokens({'additional_special_tokens':['[ENT1]', '[ENT2]']})
 
     # load test datset
-    test_dataset_dir = "/opt/ml/input/data/test/test.tsv"
     test_dataset, test_label = load_test_dataset(test_dataset_dir, tokenizer)
-    test_dataset = RE_Dataset(test_dataset, test_label)
-
-    states = [load_state(f'./model_{fold}.bin') for fold in range(5)]
-
+    test_dataset = load_data.RE_Dataset(test_dataset, test_label)
+    states = [load_state(f'./results/model_{fold}.bin') for fold in range(5)]
     probs = inference(test_dataset, device, states, len(tokenizer), cfg)
+
+
+    tokenizer.add_special_tokens({'additional_special_tokens':['[ENT1]', '[ENT2]']})
+    test_dataset, test_label = load_test_dataset_(test_dataset_dir, tokenizer)
+    test_dataset = load_data_.RE_Dataset(test_dataset, test_label)
+    states = [load_state(f'./model_{fold}_.bin') for fold in range(5)]
+    probs_ = inference(test_dataset, device, states, len(tokenizer), cfg)
         # make csv file with predicted answer
         # 아래 directory와 columns의 형태는 지켜주시기 바랍니다.
     pred_answer = np.argmax(probs, axis=-1)
     output = pd.DataFrame(pred_answer, columns=['pred'])
-    output.to_csv('/opt/ml/submission.csv', index=False)
+    output.to_csv('/opt/ml/code/submission.csv', index=False)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
