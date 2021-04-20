@@ -6,14 +6,16 @@ $> tree -d
 .
 ├── /dataloader
 │     ├── create_fold.py: dataset을 나눈다.  
-│     ├── load_data.py: info.csv에 미리 클래스를 만들어주고 이미지 파일을 jpg로 통일 
-│     ├── dataset.py: Dataset Class 정의
+│     ├── load_data.py
+│     ├── load_data_.py
+│     ├── ner_load_data.py
+│     └── dataset.py: Dataset Class 정의
 ├── /model
 │     ├── loss.py: 다양한 loss class를 정의
 │     ├── model.py: 다양한 model class을 정의
 │     └── optimizer.py: 다양한 optimizer 반환 함수 정의
 ├── /trainer
-│     ├── trainer.py: gender_age 모델 학습을 위한 Trainer class 정의
+│     └── trainer.py: gender_age 모델 학습을 위한 Trainer class 정의
 ├── config.py: Hyperparameter 를 불러온다.
 ├── config.yml: Hyperparameter 저장
 ├── inference.py
