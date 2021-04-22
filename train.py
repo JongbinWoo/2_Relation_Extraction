@@ -91,8 +91,8 @@ def train(fold, params, cfg, save_model=False):
     model = get_model(MODEL_NAME, 42, len(tokenizer), params['dropout']).to(device)
     
     optimizer = AdamW(params=model.parameters(), lr=params['lr'])
-    # loss = LabelSmoothingLoss()
-    loss = nn.CrossEntropyLoss()
+    loss = LabelSmoothingLoss(classes=42, smoothing=0.4)
+    # loss = nn.CrossEntropyLoss()
     model_set = {
         'model': model,
         'loss': loss,
@@ -109,7 +109,7 @@ def train(fold, params, cfg, save_model=False):
         if val_acc > best_acc: 
             best_acc = val_acc
             if save_model:
-                torch.save(model.state_dict(), cfg.values.train_args.output_dir + f'/model_{fold}_.bin')
+                torch.save(model.state_dict(), cfg.values.train_args.output_dir + f'/model_{fold}.bin')
             early_stopping_counter = 0
         else:
             early_stopping_counter += 1
@@ -121,7 +121,7 @@ def train(fold, params, cfg, save_model=False):
     return best_acc
 
 def main(cfg):
-    stratified_kfold(cfg)
+    # stratified_kfold(cfg)s
     USE_KFOLD = cfg.values.val_args.use_kfold     
     if USE_KFOLD:
         # objective = lambda trial: hp_search(trial, cfg)
@@ -138,13 +138,15 @@ def main(cfg):
         }
         scores = 0
         for j in range(5):
+            if j < 4:
+                continue
             scr = train(j, params, cfg, save_model=True)  #best_trial.params
             scores += scr
 
         print(scores / 5)
-        df = study.trials_dataframe(attrs=("number", "value", "params", "state"))
-        df.to_csv('./hpo_result.csv')
-        plot_parallel_coordinate(study)
+        # df = study.trials_dataframe(attrs=("number", "value", "params", "state"))
+        # df.to_csv('./hpo_result.csv')
+        # plot_parallel_coordinate(study)
     
     else:
         pass
@@ -152,9 +154,8 @@ def main(cfg):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_file_path', type=str, default='./config.yml')
-    parser.add_argument('--config', type=str, default='xlm-roberta-base')
+    parser.add_argument('--config', type=str, default='xlm-roberta-large')
     args = parser.parse_args()
-
     cfg = YamlConfigManager(args.config_file_path, args.config)
     pprint(cfg.values)
     print('\n')

@@ -43,7 +43,7 @@ def return_tag(tagging_list, is_first):
 def string_replace(string, idx_s, idx_e, replace_word):
     return string[:idx_s] + replace_word + string[idx_e+1:]
 
-def tokenized_dataset(datasejt, tokenizer):
+def tokenized_dataset(dataset, tokenizer):
     print('PRORO NER TAGGIN START!')
     concat_entity = []
     ner = Pororo(task='ner', lang='ko')
@@ -77,5 +77,33 @@ def tokenized_dataset(datasejt, tokenizer):
             )
     return tokenized_sentences
 
+def preprocessing_dataset(dataset, label_type):
+	label = []
+	for i in dataset[8]:
+		if i == 'blind':
+			label.append(100)
+		else:
+			label.append(label_type[i])
+
+	out_dataset = pd.DataFrame({'sentence':dataset[1],
+								'entity_01':dataset[2],
+								'entity_01_s': dataset[3],
+								'entity_01_e': dataset[4],
+								'entity_02':dataset[5],
+								'entity_02_s': dataset[6],
+								'entity_02_e': dataset[7],
+								'label':label})
+	return out_dataset
 
 
+# tsv 파일을 불러옵니다.
+def load_data(dataset_dir):
+	# load label_type, classes
+	with open('/opt/ml/input/data/label_type.pkl', 'rb') as f:
+		label_type = pickle.load(f)
+	# load dataset
+	dataset = pd.read_csv(dataset_dir, delimiter='\t', header=None)
+	# preprecessing dataset
+	dataset = preprocessing_dataset(dataset, label_type)
+	
+	return dataset

@@ -30,7 +30,7 @@ electra-base-v3:
     num_k: 5
     test_size: 0
 
-xlm-roberta-base:
+xlm-roberta-large:
   model_arc: "roberta"
   model_name: "xlm-roberta-large"
   seed: 42
